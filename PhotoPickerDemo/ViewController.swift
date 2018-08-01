@@ -12,7 +12,7 @@ import MobileCoreServices // kUTTypeImage
 
 class ViewController: UIViewController {
 
-    var picker = UIImagePickerController()
+    var wrapped: WrappedImagePicker!
 
     @IBOutlet weak var imageView: UIImageView!
 
@@ -21,29 +21,58 @@ class ViewController: UIViewController {
     @IBOutlet weak var pickPhotoButton: UIBarButtonItem!
 
     @IBAction func takePhoto(_ sender: UIBarButtonItem) {
-        takePhoto()
+        wrapped.takePhoto()
     }
 
     @IBAction func pickPhoto(_ sender: UIBarButtonItem) {
-        pickPhoto()
-        picker.popoverPresentationController?.barButtonItem = sender
+        wrapped.pickPhoto()
     }
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        picker.delegate = self
-        takePhotoButton.isEnabled = UIImagePickerController.isSourceTypeAvailable(.camera)
-    }
-
-    override func viewWillAppear(_ animated: Bool) {
-        super.viewWillAppear(animated)
-
+        wrapped = WrappedImagePicker(parent: self, imageView: imageView)
+        takePhotoButton.isEnabled = wrapped.isCameraAvailable
     }
 
 }
 
 
-extension ViewController: UIImagePickerControllerDelegate, UINavigationControllerDelegate {
+class WrappedImagePicker: NSObject, UIImagePickerControllerDelegate, UINavigationControllerDelegate  {
+
+    var parentVC: UIViewController!
+    var imageView: UIImageView!
+
+    var picker = UIImagePickerController()
+
+    init(parent: UIViewController, imageView: UIImageView) {
+        self.parentVC = parent
+        self.imageView = imageView
+        super.init()
+        picker.delegate = self
+    }
+
+    var isCameraAvailable: Bool { get { return UIImagePickerController.isSourceTypeAvailable(.camera)}}
+
+    func pickPhoto() {
+        picker.sourceType = .photoLibrary
+        picker.mediaTypes = [String(kUTTypeImage)]
+        picker.allowsEditing = true
+        picker.modalPresentationStyle = .popover
+        parentVC.present(picker, animated: true, completion: nil)
+//        parentVC.popoverPresentationController?.barButtonItem = sender
+    }
+
+    func takePhoto() {
+        if UIImagePickerController.isSourceTypeAvailable(.camera) {
+            picker.sourceType = .camera
+            picker.cameraCaptureMode = .photo
+            picker.allowsEditing = true
+            picker.modalPresentationStyle = .fullScreen
+            parentVC.present(picker, animated: true, completion: nil)
+        } else {
+            print("*** no camera available")
+        }
+    }
 
     func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [String : Any]) {
         let originalImage = info[UIImagePickerControllerOriginalImage] as! UIImage
@@ -54,34 +83,13 @@ extension ViewController: UIImagePickerControllerDelegate, UINavigationControlle
 
         // use edited or original image here!
 
-        dismiss(animated: true, completion: nil)
+        parentVC.dismiss(animated: true, completion: nil)
     }
 
     func imagePickerControllerDidCancel(_ picker: UIImagePickerController) {
-        dismiss(animated: true, completion: nil)
-    }
-
-    private func pickPhoto() {
-        picker.sourceType = .photoLibrary
-        picker.mediaTypes = [String(kUTTypeImage)]
-        picker.allowsEditing = true
-        picker.modalPresentationStyle = .popover
-        present(picker, animated: true, completion: nil)
-    }
-
-    private func takePhoto() {
-        if UIImagePickerController.isSourceTypeAvailable(.camera) {
-            picker.sourceType = .camera
-            picker.cameraCaptureMode = .photo
-            picker.allowsEditing = true
-            picker.modalPresentationStyle = .fullScreen
-            present(picker, animated: true, completion: nil)
-        } else {
-            print("*** no camera available")
-        }
+        parentVC.dismiss(animated: true, completion: nil)
     }
 
 }
-
 
 
