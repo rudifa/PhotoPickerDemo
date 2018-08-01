@@ -36,7 +36,7 @@
                                     <barButtonItem style="plain" systemItem="flexibleSpace" id="fue-gC-3XH"/>
                                 </items>
                             </toolbar>
-                            <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="5Jz-qf-r5G" userLabel="Image View">
+                            <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="5Jz-qf-r5G" userLabel="Image View" customClass="UIImageView">
                                 <rect key="frame" x="0.0" y="0.0" width="375" height="623"/>
                                 <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                             </view>
