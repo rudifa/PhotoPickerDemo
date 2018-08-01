@@ -10,7 +10,7 @@ import UIKit
 
 import MobileCoreServices // kUTTypeImage
 
-class ViewController: UIViewController {
+class ViewController: UIViewController, WrappedImagePickerDelegate {
 
     var wrapped: WrappedImagePicker!
 
@@ -21,39 +21,49 @@ class ViewController: UIViewController {
     @IBOutlet weak var pickPhotoButton: UIBarButtonItem!
 
     @IBAction func takePhoto(_ sender: UIBarButtonItem) {
-        wrapped.takePhoto()
+        wrapped.takePhoto(edited: true)
     }
 
     @IBAction func pickPhoto(_ sender: UIBarButtonItem) {
-        wrapped.pickPhoto()
+        wrapped.pickPhoto(edited: true)
     }
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        wrapped = WrappedImagePicker(parent: self, imageView: imageView)
+        wrapped = WrappedImagePicker(parent: self, imageView: imageView, delegate: self)
         takePhotoButton.isEnabled = wrapped.isCameraAvailable
+    }
+
+    func photoAvailable(image: UIImage) {
+        print("   photoAvailable image.size=", image.size)
+        // use image...
     }
 
 }
 
+protocol WrappedImagePickerDelegate {
+    func photoAvailable(image: UIImage)
+}
 
 class WrappedImagePicker: NSObject, UIImagePickerControllerDelegate, UINavigationControllerDelegate  {
 
     var parentVC: UIViewController!
     var imageView: UIImageView!
+    var delegate: WrappedImagePickerDelegate!
 
     var picker = UIImagePickerController()
 
-    init(parent: UIViewController, imageView: UIImageView) {
+    init(parent: UIViewController, imageView: UIImageView, delegate: WrappedImagePickerDelegate) {
         self.parentVC = parent
         self.imageView = imageView
+        self.delegate = delegate
         super.init()
         picker.delegate = self
     }
 
     var isCameraAvailable: Bool { get { return UIImagePickerController.isSourceTypeAvailable(.camera)}}
 
-    func pickPhoto() {
+    func pickPhoto(edited: Bool) {
         picker.sourceType = .photoLibrary
         picker.mediaTypes = [String(kUTTypeImage)]
         picker.allowsEditing = true
@@ -62,11 +72,11 @@ class WrappedImagePicker: NSObject, UIImagePickerControllerDelegate, UINavigatio
 //        parentVC.popoverPresentationController?.barButtonItem = sender
     }
 
-    func takePhoto() {
+    func takePhoto(edited: Bool) {
         if UIImagePickerController.isSourceTypeAvailable(.camera) {
             picker.sourceType = .camera
             picker.cameraCaptureMode = .photo
-            picker.allowsEditing = true
+            picker.allowsEditing = edited
             picker.modalPresentationStyle = .fullScreen
             parentVC.present(picker, animated: true, completion: nil)
         } else {
@@ -75,14 +85,10 @@ class WrappedImagePicker: NSObject, UIImagePickerControllerDelegate, UINavigatio
     }
 
     func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [String : Any]) {
-        let originalImage = info[UIImagePickerControllerOriginalImage] as! UIImage
         let editedImage = info[UIImagePickerControllerEditedImage] as! UIImage
-        print("   imagePickerController image sizes", originalImage.size, editedImage.size)
         imageView.contentMode = .scaleAspectFit
         imageView.image = editedImage
-
-        // use edited or original image here!
-
+        delegate.photoAvailable(image: editedImage)
         parentVC.dismiss(animated: true, completion: nil)
     }
 
