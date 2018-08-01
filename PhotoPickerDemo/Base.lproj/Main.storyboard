@@ -55,6 +55,8 @@
                     </view>
                     <connections>
                         <outlet property="imageView" destination="5Jz-qf-r5G" id="Cpf-MD-bfl"/>
+                        <outlet property="pickPhotoButton" destination="MUx-68-sq7" id="fFe-f9-Po7"/>
+                        <outlet property="takePhotoButton" destination="KeE-L2-4aS" id="Btq-1q-B1v"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="dkx-z0-nzr" sceneMemberID="firstResponder"/>

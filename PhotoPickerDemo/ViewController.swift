@@ -16,6 +16,10 @@ class ViewController: UIViewController {
 
     @IBOutlet weak var imageView: UIImageView!
 
+    @IBOutlet weak var takePhotoButton: UIBarButtonItem!
+
+    @IBOutlet weak var pickPhotoButton: UIBarButtonItem!
+    
     @IBAction func takePhoto(_ sender: UIBarButtonItem) {
         if UIImagePickerController.isSourceTypeAvailable(.camera) {
             picker.sourceType = .camera
@@ -40,6 +44,7 @@ class ViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         picker.delegate = self
+        takePhotoButton.isEnabled = UIImagePickerController.isSourceTypeAvailable(.camera)
     }
 
 }
